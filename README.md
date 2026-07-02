@@ -1,20 +1,72 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# 🚀 CareerPath AI
 
-# Run and deploy your AI Studio app
+> **Discover Your Future. Build Your Career.**
 
-This contains everything you need to run your app locally.
+CareerPath AI is an AI-powered career guidance platform that helps students and professionals discover the best career paths based on their interests, skills, and goals. The platform provides personalized career recommendations, salary insights, learning roadmaps, and an interactive dashboard in a modern startup-inspired interface.
 
-View your app in AI Studio: https://ai.studio/apps/b1889cdf-a0c5-45bc-bba7-0f1966e18878
+## ✨ Features
 
-## Run Locally
+* 🤖 AI-powered Career Recommendations
+* 📈 Career Growth & Future Scope Analysis
+* 💰 Salary Insights for India
+* 🛣️ Personalized Learning Roadmaps
+* 🎯 AI Skill Gap Analysis
+* 📊 Interactive Dashboard
+* 📚 Career Resources
+* 🔖 Save & Bookmark Career Paths
+* 🔐 Secure Authentication (JWT + bcrypt)
+* 👨‍💼 Admin Dashboard
+* 📧 Email Notifications
+* 🌙 Premium Dark UI
+* ✨ Smooth Animations & Glassmorphism
+* 📱 Fully Responsive Design
 
-**Prerequisites:**  Node.js
+## 🛠️ Tech Stack
 
+### Frontend
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+* React
+* TypeScript
+* Tailwind CSS
+* Framer Motion
+* React Router
+* Axios
+
+### Backend
+
+* Node.js
+* Express.js
+* MongoDB
+* Mongoose
+* JWT Authentication
+* bcrypt
+* Nodemailer
+
+## 🎯 Project Goal
+
+CareerPath AI aims to simplify career planning by providing students with personalized guidance using AI, helping them make informed career decisions with real-world insights.
+
+## 📸 Screenshots
+
+> Add screenshots of the Home Page, Dashboard, Career Recommendations, Login, and AI Features here.
+
+## 🚀 Future Improvements
+
+* AI Mock Interviews
+* Resume ATS Analyzer
+* AI Career DNA Assessment
+* Portfolio Generator
+* Live Internship & Job Listings
+* Career Analytics Dashboard
+* Gamification & Achievement System
+
+## 📬 Contact
+
+**Keshav Dhanuka**
+
+📧 Email: [keshavdhanuka74@gmail.com](mailto:keshavdhanuka74@gmail.com)
+
+📍 Kolkata, India
+
+If you found this project interesting, consider giving it a ⭐ on GitHub!
+
