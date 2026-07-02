@@ -1,25 +1,46 @@
 # 🚀 CareerPath AI
 
-> **Discover Your Future. Build Your Career.**
+<p align="center">
+  <h3 align="center">Discover Your Future. Build Your Career.</h3>
+  <p align="center">
+    An AI-powered career guidance platform built to help students and professionals make smarter career decisions.
+  </p>
+</p>
 
-CareerPath AI is an AI-powered career guidance platform that helps students and professionals discover the best career paths based on their interests, skills, and goals. The platform provides personalized career recommendations, salary insights, learning roadmaps, and an interactive dashboard in a modern startup-inspired interface.
+---
+
+## 🌐 Live Demo
+
+**Website:** https://careerrpath.netlify.app/
+
+---
+
+## 📖 About
+
+CareerPath AI is a modern full-stack web application that helps users discover the best career opportunities based on their interests, skills, and career goals.
+
+Instead of simply showing career names, the platform provides detailed guidance including career growth, salary insights, required skills, learning roadmaps, and AI-powered recommendations in a beautiful startup-inspired interface.
+
+---
 
 ## ✨ Features
 
-* 🤖 AI-powered Career Recommendations
-* 📈 Career Growth & Future Scope Analysis
-* 💰 Salary Insights for India
-* 🛣️ Personalized Learning Roadmaps
-* 🎯 AI Skill Gap Analysis
+* 🤖 AI Career Recommendation
+* 📈 Career Growth Analysis
+* 💰 Salary Insights
+* 🛣️ Learning Roadmaps
+* 🎯 Skill Gap Analysis
 * 📊 Interactive Dashboard
 * 📚 Career Resources
-* 🔖 Save & Bookmark Career Paths
-* 🔐 Secure Authentication (JWT + bcrypt)
+* 🔖 Save & Bookmark Careers
+* 🔐 Secure User Authentication
 * 👨‍💼 Admin Dashboard
 * 📧 Email Notifications
-* 🌙 Premium Dark UI
-* ✨ Smooth Animations & Glassmorphism
+* 🌙 Modern Dark Theme
+* ✨ Smooth Animations
 * 📱 Fully Responsive Design
+
+---
 
 ## 🛠️ Tech Stack
 
@@ -42,25 +63,76 @@ CareerPath AI is an AI-powered career guidance platform that helps students and 
 * bcrypt
 * Nodemailer
 
+---
+
+## 🚀 Upcoming Features
+
+* AI Career DNA
+* Resume ATS Analyzer
+* AI Mock Interviews
+* Portfolio Generator
+* Internship Tracker
+* Live Job Opportunities
+* Company Explorer
+* Achievement System
+* AI Career Mentor
+* Career Analytics
+
+---
+
+## 📂 Folder Structure
+
+```
+client/
+server/
+public/
+src/
+components/
+pages/
+models/
+routes/
+controllers/
+middleware/
+utils/
+```
+
+---
+
+## ⚙️ Installation
+
+```bash
+git clone https://github.com/your-username/careerpath-ai.git
+
+cd careerpath-ai
+
+npm install
+
+npm run dev
+```
+
+---
+
+## 🔐 Environment Variables
+
+Create a `.env` file:
+
+```
+MONGO_URI=
+JWT_SECRET=
+EMAIL_USER=
+EMAIL_PASS=
+OPENAI_API_KEY=
+```
+
+---
+
 ## 🎯 Project Goal
 
-CareerPath AI aims to simplify career planning by providing students with personalized guidance using AI, helping them make informed career decisions with real-world insights.
+To make career planning simple, personalized, and accessible through AI-powered guidance, helping users explore the right career paths with confidence.
 
-## 📸 Screenshots
+---
 
-> Add screenshots of the Home Page, Dashboard, Career Recommendations, Login, and AI Features here.
-
-## 🚀 Future Improvements
-
-* AI Mock Interviews
-* Resume ATS Analyzer
-* AI Career DNA Assessment
-* Portfolio Generator
-* Live Internship & Job Listings
-* Career Analytics Dashboard
-* Gamification & Achievement System
-
-## 📬 Contact
+## 👨‍💻 Developer
 
 **Keshav Dhanuka**
 
@@ -68,5 +140,10 @@ CareerPath AI aims to simplify career planning by providing students with person
 
 📍 Kolkata, India
 
-If you found this project interesting, consider giving it a ⭐ on GitHub!
+---
 
+## ⭐ Support
+
+If you found this project useful, please consider giving it a **Star ⭐** on GitHub.
+
+Every star motivates me to build more amazing projects!
