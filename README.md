@@ -142,8 +142,4 @@ To make career planning simple, personalized, and accessible through AI-powered 
 
 ---
 
-## ⭐ Support
 
-If you found this project useful, please consider giving it a **Star ⭐** on GitHub.
-
-Every star motivates me to build more amazing projects!
