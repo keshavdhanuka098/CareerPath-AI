@@ -22,10 +22,6 @@ const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const COOKIE_NAME = "careerpath_session";
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
 
-// ================= CORE SECURITY MIDDLEWARE =================
-
-// Helmet: sensible secure HTTP headers. CSP is relaxed slightly so the
-// existing Vite/React UI, animations, and inline styles keep working as-is.
 app.use(
   helmet({
     contentSecurityPolicy: false,
@@ -33,7 +29,6 @@ app.use(
   })
 );
 
-// CORS: allow the site's own origin to send credentials (cookies).
 app.use(
   cors({
     origin: CLIENT_URL,
@@ -44,9 +39,8 @@ app.use(
 app.use(cookieParser());
 app.use(express.json({ limit: "2mb" }));
 
-// Rate limiting: protect authentication endpoints from brute-force / abuse.
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000, 
   limit: 30,
   standardHeaders: true,
   legacyHeaders: false,
@@ -69,7 +63,6 @@ const apiLimiter = rateLimit({
 });
 app.use("/api/", apiLimiter);
 
-// Token secret helper
 const JWT_SECRET = process.env.JWT_SECRET || "super-secret-careerpath-key-12345";
 if (!process.env.JWT_SECRET) {
   console.warn(
@@ -77,7 +70,6 @@ if (!process.env.JWT_SECRET) {
   );
 }
 
-// Issue an HTTP-only auth cookie (preferred transport) alongside a bearer token.
 function issueSessionCookie(res: any, token: string, rememberMe: boolean) {
   const maxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 30d vs 1d
   res.cookie(COOKIE_NAME, token, {
@@ -98,9 +90,6 @@ function clearSessionCookie(res: any) {
   });
 }
 
-// Security Helper: JWT Verification Middleware.
-// Reads the token from the HTTP-only cookie first (preferred), and falls
-// back to the Authorization: Bearer header for API/CLI clients.
 function authenticateToken(req: any, res: any, next: any) {
   const cookieToken = req.cookies?.[COOKIE_NAME];
   const authHeader = req.headers["authorization"];
@@ -129,7 +118,6 @@ function authenticateToken(req: any, res: any, next: any) {
   });
 }
 
-// Security Helper: Admin Only Middleware
 function requireAdmin(req: any, res: any, next: any) {
   authenticateToken(req, res, () => {
     if (req.user.role !== "admin" && req.user.email.toLowerCase() !== "keshavdhanuka74@gmail.com") {
@@ -139,7 +127,6 @@ function requireAdmin(req: any, res: any, next: any) {
   });
 }
 
-// Small helper to run express-validator chains and short-circuit on error.
 function validate(req: any, res: any) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -149,7 +136,6 @@ function validate(req: any, res: any) {
   return true;
 }
 
-// Initialize Gemini client lazily
 let aiClient: GoogleGenAI | null = null;
 function getGeminiClient(): GoogleGenAI | null {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -170,7 +156,6 @@ function getGeminiClient(): GoogleGenAI | null {
   return aiClient;
 }
 
-// Fallback high-quality data in case Gemini key is missing or fails
 const FALLBACK_CAREERS = [
   {
     title: "AI Engineer",
@@ -237,9 +222,7 @@ const FALLBACK_CAREERS = [
   }
 ];
 
-// ================= AUTHENTICATION ENDPOINTS =================
 
-// 1. API: Sign Up / Registration
 app.post(
   "/api/auth/register",
   authLimiter,
@@ -265,28 +248,24 @@ app.post(
     try {
       const { name, email, password } = req.body;
 
-      // Check if user already exists
       const existingUser = await Database.findUserByEmail(email);
       if (existingUser) {
         return res.status(409).json({ error: "Email address is already registered." });
       }
 
-      // Securely hash password using bcrypt
       const salt = await bcrypt.genSalt(10);
       const passwordHash = await bcrypt.hash(password, salt);
 
-      // Create user in persistent MongoDB database
       const user = await Database.createUser({
         name,
         email: email.toLowerCase(),
         passwordHash,
-        role: "user", // Database class will auto-promote owner email to 'admin'
+        role: "user",
         interests: [],
         savedCareers: [],
         bookmarkedOpportunities: [],
       });
 
-      // Auto trigger admin notification email asynchronously so registration doesn't stall
       const userAgent = req.headers["user-agent"] || "";
       const ip = req.ip || req.headers["x-forwarded-for"] || "";
 
@@ -295,18 +274,15 @@ app.post(
         email: user.email,
         userAgent,
         ip: String(ip),
-        country: "India", // Default target market
+        country: "India",
       }).catch((err) => console.error("Admin registration notice failed:", err));
 
-      // Generate JWT access token
       const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, {
         expiresIn: "1d",
       });
 
-      // Set secure HTTP-only session cookie (preferred auth transport)
       issueSessionCookie(res, token, false);
 
-      // Strip passwordHash from response payload
       const { passwordHash: _, ...userProfile } = user;
 
       return res.status(201).json({
@@ -321,7 +297,6 @@ app.post(
   }
 );
 
-// 2. API: Sign In / Login
 app.post(
   "/api/auth/login",
   authLimiter,
@@ -339,16 +314,12 @@ app.post(
         return res.status(401).json({ error: "Invalid email credentials or password." });
       }
 
-      // Securely verify password
       const isMatch = await bcrypt.compare(password, user.passwordHash);
       if (!isMatch) {
         return res.status(401).json({ error: "Invalid email credentials or password." });
       }
-
-      // Update lastLogin tracking
       await Database.updateUser(user.id, { lastLogin: new Date().toISOString() as any });
 
-      // Generate JWT Token. Set long expiry if "Remember Me" is toggled
       const expiresIn = rememberMe ? "30d" : "1d";
       const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, {
         expiresIn,
@@ -357,7 +328,6 @@ app.post(
       // Set secure HTTP-only session cookie. Duration respects "Remember Me".
       issueSessionCookie(res, token, Boolean(rememberMe));
 
-      // Strip passwordHash from output
       const { passwordHash: _, ...userProfile } = user;
 
       return res.json({
@@ -372,19 +342,16 @@ app.post(
   }
 );
 
-// 3. API: Get Logged In User / Token Verification
 app.get("/api/auth/me", authenticateToken, (req: any, res) => {
   const { passwordHash: _, ...userProfile } = req.user;
   return res.json({ user: userProfile });
 });
 
-// 4. API: Logout — clears the HTTP-only session cookie
 app.post("/api/auth/logout", (req, res) => {
   clearSessionCookie(res);
   return res.json({ message: "Logged out successfully." });
 });
 
-// 5. API: Forgot Password (Request Link)
 app.post(
   "/api/auth/forgot-password",
   forgotPasswordLimiter,
@@ -402,20 +369,16 @@ app.post(
         });
       }
 
-      // Generate secure single-use reset token
       const token = await Database.createResetToken(user.email);
 
-      // Build reset URL pointing to development URL structure
-      // Since we're using React State, we can build the URL as query params on the homepage, which App.tsx can read on load!
       const hostUrl = req.headers["referer"] || req.headers["host"] || CLIENT_URL;
       const resetUrl = `${String(hostUrl).split("?")[0]}?resetToken=${token}`;
 
-      // Send reset email via Nodemailer
       const mailResult = await Mailer.sendResetPasswordEmail(user.email, resetUrl);
 
       return res.json({
         message: "If the email is registered, a secure reset link will be delivered within 5 minutes.",
-        debugPreview: mailResult.preview, // Helpful preview inside workspace sandbox
+        debugPreview: mailResult.preview,
       });
     } catch (error) {
       console.error("Forgot password error:", error);
@@ -424,7 +387,6 @@ app.post(
   }
 );
 
-// 6. API: Reset Password (Execute Reset)
 app.post(
   "/api/auth/reset-password",
   authLimiter,
@@ -449,7 +411,6 @@ app.post(
     try {
       const { token, password } = req.body;
 
-      // Verify recovery token validity and expiration
       const email = await Database.verifyResetToken(token);
       if (!email) {
         return res.status(400).json({ error: "Your password reset token is invalid or has expired." });
@@ -460,17 +421,13 @@ app.post(
         return res.status(404).json({ error: "User associated with this token no longer exists." });
       }
 
-      // Securely hash new password
       const salt = await bcrypt.genSalt(10);
       const newHash = await bcrypt.hash(password, salt);
 
-      // Update user in DB
       await Database.updateUser(user.id, { passwordHash: newHash });
 
-      // Invalidate reset token immediately
       await Database.removeResetToken(token);
 
-      // Notify admin that a password reset occurred (never includes the password itself)
       const userAgent = req.headers["user-agent"] || "";
       const ip = req.ip || req.headers["x-forwarded-for"] || "";
       Mailer.sendAdminPasswordResetNotification({
@@ -480,7 +437,6 @@ app.post(
         ip: String(ip),
       }).catch((err) => console.error("Admin password reset notice failed:", err));
 
-      // Invalidate any existing session cookie so the user must log in again with the new password
       clearSessionCookie(res);
 
       return res.json({ message: "Your password has been reset successfully. You can now login with your new password." });
@@ -491,7 +447,6 @@ app.post(
   }
 );
 
-// 7. API: Sync User Progress, Saved Careers and Interests
 app.post("/api/user/sync", authenticateToken, async (req: any, res) => {
   try {
     const { interests, savedCareers, bookmarkedOpportunities, name, profileImage } = req.body;
@@ -515,25 +470,15 @@ app.post("/api/user/sync", authenticateToken, async (req: any, res) => {
     return res.status(500).json({ error: "Failed to sync updates to the cloud." });
   }
 });
-
-
-// ================= ADMINISTRATOR SECURE SERVICES =================
-
-// 1. API: Get complete users and activity log analytics
 app.get("/api/admin/users", requireAdmin, async (req, res) => {
   const users = await Database.getUsers();
-  
-  // Format user records for admin display (Strict: Never expose passwordHash)
   const formattedUsers = users.map(({ passwordHash: _, ...profile }) => profile);
 
-  // Derive interesting analytics metrics
   const totalUsers = users.length;
   
-  // Count active in last 24h
   const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
   const activeToday = users.filter(u => new Date(u.lastLogin).getTime() > oneDayAgo).length;
 
-  // Aggregate interests counts
   const interestsMap: { [key: string]: number } = {};
   users.forEach(u => {
     u.interests?.forEach(interest => {
@@ -552,15 +497,11 @@ app.get("/api/admin/users", requireAdmin, async (req, res) => {
   });
 });
 
-// 2. API: Get sent emails trace logs (simulate sandbox inbox)
 app.get("/api/admin/emails", requireAdmin, (req, res) => {
   return res.json({ emails: sentEmailsLog });
 });
 
 
-// ================= ORIGINAL CAREER API ROUTERS =================
-
-// 1. API: Career Recommendation
 app.post("/api/recommend", async (req, res) => {
   try {
     const { interests, experienceLevel } = req.body;
@@ -570,7 +511,6 @@ app.post("/api/recommend", async (req, res) => {
 
     const ai = getGeminiClient();
     if (!ai) {
-      // Use fallback data and filter loosely based on matching words or send all
       console.log("Serving fallback career recommendation data due to missing API Key.");
       return res.json({ careers: FALLBACK_CAREERS });
     }
@@ -640,12 +580,10 @@ For each career field, provide detailed information exactly matching the require
     return res.json(data);
   } catch (error: any) {
     console.error("Gemini API Recommendation Error:", error);
-    // Graceful fallback to avoid erroring out
     return res.json({ careers: FALLBACK_CAREERS, note: "Loaded via fallback database due to api rate/token limit." });
   }
 });
 
-// 2. API: AI Chat Assistant
 app.post("/api/chat", async (req, res) => {
   try {
     const { messages } = req.body;
@@ -655,7 +593,6 @@ app.post("/api/chat", async (req, res) => {
 
     const ai = getGeminiClient();
     if (!ai) {
-      // Simulate intelligent career-oriented responses
       const lastUserMsg = messages[messages.length - 1]?.content?.toLowerCase() || "";
       let reply = "I'm your CareerPath AI assistant! I'd love to help you explore jobs, colleges, salaries, and roadmaps in India. Ask me about specific coding languages, design domains, finance positions, or interview strategies.";
       if (lastUserMsg.includes("salary") || lastUserMsg.includes("money") || lastUserMsg.includes("lpa")) {
@@ -668,7 +605,6 @@ app.post("/api/chat", async (req, res) => {
       return res.json({ text: reply });
     }
 
-    // Convert messages to Gemini format
     const chatHistory = messages.map(msg => `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`).join("\n");
     
     const systemPrompt = `You are "CareerPath AI", an empathetic, highly knowledgeable, and professional career advisor for students and job seekers in India. 
@@ -688,7 +624,6 @@ Be encouraging, structured, and give concise, high-value advice. Use bullet poin
   }
 });
 
-// Setup Vite Dev Server / Serve static build in Production
 async function startServer() {
   try {
     await connectDB();
